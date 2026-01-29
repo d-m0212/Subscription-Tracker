@@ -1,0 +1,159 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Subscription Management Dashboard</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='css/output.css') }}">
+</head>
+
+<body class="bg-gradient-to-br from-blue-50 to-indigo-100 min-h-screen">
+    <div class="container mx-auto px-4 py-8 max-w-7xl">
+        <!-- Header -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h1 class="text-3xl font-bold text-gray-800 mb-2">Subscription Management Dashboard</h1>
+            <p class="text-gray-600">Track recurring expenses and analyze spending patterns</p>
+        </div>
+
+        <!-- Metrics Cards -->
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-6">
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm mb-1">Monthly Cost</p>
+                        <p id="monthly-cost" class="text-3xl font-bold text-blue-600">₹0.00</p>
+                    </div>
+                    <svg class="w-10 h-10 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z">
+                        </path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm mb-1">Annual Cost</p>
+                        <p id="annual-cost" class="text-3xl font-bold text-green-600">₹0.00</p>
+                    </div>
+                    <svg class="w-10 h-10 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M13 7h8m0 0v8m0-8l-8 8-4-4-6 6"></path>
+                    </svg>
+                </div>
+            </div>
+
+            <div class="bg-white rounded-lg shadow-lg p-6">
+                <div class="flex items-center justify-between">
+                    <div>
+                        <p class="text-gray-600 text-sm mb-1">Active Subscriptions</p>
+                        <p id="total-subs" class="text-3xl font-bold text-purple-600">0</p>
+                    </div>
+                    <svg class="w-10 h-10 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                            d="M8 7V3m8 4V3m-9 8h10M5 21h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v12a2 2 0 002 2z">
+                        </path>
+                    </svg>
+                </div>
+            </div>
+        </div>
+
+        <!-- Category Breakdown -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Spending by Category (<span
+                    id="category-total">₹0.00</span>/month)</h2>
+            <div id="category-breakdown" class="space-y-3">
+                <!-- Categories will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Upcoming Renewals -->
+        <div class="bg-white rounded-lg shadow-lg p-6 mb-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Upcoming Renewals (Next 90 Days)</h2>
+            <div id="renewals-list" class="space-y-2">
+                <!-- Renewals will be inserted here -->
+            </div>
+        </div>
+
+        <!-- Actions -->
+        <div class="flex gap-4 mb-6">
+            <button onclick="toggleAddForm()"
+                class="flex items-center gap-2 bg-blue-600 text-white px-6 py-3 rounded-lg hover:bg-blue-700 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4"></path>
+                </svg>
+                Add Subscription
+            </button>
+            <button onclick="exportToExcel()"
+                class="flex items-center gap-2 bg-green-600 text-white px-6 py-3 rounded-lg hover:bg-green-700 transition">
+                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2"
+                        d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"></path>
+                </svg>
+                Export to Excel
+            </button>
+        </div>
+
+        <!-- Add Form (Hidden by default) -->
+        <div id="add-form" class="bg-white rounded-lg shadow-lg p-6 mb-6 hidden">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">Add New Subscription</h2>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <input type="text" id="sub-name" placeholder="Name (e.g., Netflix)"
+                    class="border border-gray-300 rounded px-4 py-2">
+                <input type="number" id="sub-amount" min="0.01" step="0.01" placeholder="Amount"
+                    class="border border-gray-300 rounded px-4 py-2">
+                <select id="sub-cycle" class="border border-gray-300 rounded px-4 py-2">
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="annual">Annual</option>
+                </select>
+                <select id="sub-category" onchange="handleCategoryChange()"
+                    class="border border-gray-300 rounded px-4 py-2">
+                    <option value="Entertainment">Entertainment</option>
+                    <option value="Productivity">Productivity</option>
+                    <option value="Health & Fitness">Health & Fitness</option>
+                    <option value="Education">Education</option>
+                    <option value="Other">Other</option>
+                </select>
+                <input type="text" id="custom-category" placeholder="Specify category"
+                    class="border border-gray-300 rounded px-4 py-2 hidden">
+                <input type="date" id="sub-start-date" placeholder="Start Date"
+                    class="border border-gray-300 rounded px-4 py-2">
+            </div>
+            <button onclick="saveSubscription()"
+                class="mt-4 bg-blue-600 text-white px-6 py-2 rounded-lg hover:bg-blue-700 transition">
+                Save Subscription
+            </button>
+        </div>
+
+        <!-- All Subscriptions Table -->
+        <div class="bg-white rounded-lg shadow-lg p-6">
+            <h2 class="text-xl font-bold text-gray-800 mb-4">All Subscriptions</h2>
+            <div class="overflow-x-auto">
+                <table class="w-full">
+                    <thead>
+                        <tr class="border-b">
+                            <th class="text-left py-3 px-4">Name</th>
+                            <th class="text-left py-3 px-4">Amount</th>
+                            <th class="text-left py-3 px-4">Cycle</th>
+                            <th class="text-left py-3 px-4">Category</th>
+                            <th class="text-left py-3 px-4">Start Date</th>
+                            <th class="text-left py-3 px-4">Next Renewal</th>
+                            <th class="text-left py-3 px-4">Monthly Cost</th>
+                            <th class="text-center py-3 px-4">Action</th>
+                        </tr>
+                    </thead>
+                    <tbody id="subscriptions-table">
+                        <!-- Subscriptions will be inserted here -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <script src="{{ url_for('static', filename='js/main.js') }}"></script>
+</body>
+
+</html>
